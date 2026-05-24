@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Surprise</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Baloo 2', cursive }
+  body { background: white; overflow-x: hidden }
+  .floaty { animation: floaty 3s ease-in-out infinite }
+  .fade { animation: fade .5s ease }
+  @keyframes floaty {
+    0%   { transform: translateY(0) }
+    50%  { transform: translateY(-10px) }
+    100% { transform: translateY(0) }
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(20px) }
+    to   { opacity: 1; transform: translateY(0) }
+  }
+
+  /* ── FIX 1: wrong-heart shake ── */
+  @keyframes shake {
+    0%,100% { transform: translateX(0) }
+    20%      { transform: translateX(-6px) }
+    40%      { transform: translateX(6px) }
+    60%      { transform: translateX(-4px) }
+    80%      { transform: translateX(4px) }
+  }
+  .shake { animation: shake .4s ease }
+
+  /* ── FIX 3: music-button pulse ── */
+  #musicBtn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 999;
+    background: #f9a8d4; border: none; border-radius: 50%;
+    width: 52px; height: 52px; font-size: 22px;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(249,168,212,.6);
+    transition: transform .2s;
+  }
+  #musicBtn:hover { transform: scale(1.15) }
+  #musicBtn.playing { animation: pulse 1.8s ease-in-out infinite }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 4px 14px rgba(249,168,212,.6) }
+    50%      { box-shadow: 0 4px 28px rgba(249,168,212,1) }
+  }
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+<!-- ── FIX 3: autoplay removed; replaced with click-to-play button ── -->
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_9464983d46.mp3?filename=romantic-background-112763.mp3" type="audio/mpeg">
+</audio>
+<button id="musicBtn" title="Play / Pause music">🎵</button>
+
+<div class="w-full max-w-3xl bg-[#fffafa] border border-pink-100 rounded-[40px] shadow-2xl p-8 relative z-10">
+
+  <!-- header bar -->
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex gap-2">
+      <div class="w-4 h-4 bg-red-300 rounded-full"></div>
+      <div class="w-4 h-4 bg-yellow-300 rounded-full"></div>
+      <div class="w-4 h-4 bg-green-300 rounded-full"></div>
+    </div>
+    <div class="bg-pink-100 text-pink-500 px-4 py-2 rounded-full text-sm font-bold">
+      Made for you by Raf :).exe
+    </div>
+  </div>
+
+  <!-- typing banner -->
+  <div class="text-center mb-8">
+    <p id="typed" class="text-pink-500 text-2xl font-extrabold lowercase"></p>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SCREEN 1 — Pick the correct heart
+       FIX: randomise which button is "correct"
+       Wrong ones shake + show a tiny toast
+  ════════════════════════════════════════ -->
+  <div id="screen1" class="text-center fade">
+    <img src="https://media.tenor.com/W3t9j6lBKOEAAAAi/snoopy-flowers.gif" class="mx-auto w-40 floaty" alt="Snoopy with flowers">
+
+    <h1 class="text-5xl font-black text-pink-500 mt-4">
+      Choose the correct heart 💖
+    </h1>
+    <p class="text-gray-400 mt-2 text-sm">Hint: only one of them is the right one 👀</p>
+
+    <!-- toast for wrong picks -->
+    <div id="toast" class="hidden mt-4 text-pink-400 font-bold text-lg"></div>
+
+    <div id="heartGrid" class="grid grid-cols-3 gap-4 mt-10 max-w-sm mx-auto">
+      <!-- buttons injected by JS so the correct one is random every load -->
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SCREEN 2 — Birthday message
+       FIX: replaced broken Tenor page URL
+            with a working direct GIF
+  ════════════════════════════════════════ -->
+  <div id="screen2" class="hidden text-center fade">
+    <img
+      src="https://media.tenor.com/dL7IYCRPuLIAAAAi/hug-love.gif"
+      class="mx-auto w-52 floaty"
+      alt="cute hug gif"
+    >
+    <h1 class="text-5xl font-black text-pink-500 mt-4">
+      HAPPIEST BIRTHDAY TO YOU MISHHH 🎂
+    </h1>
+    <p class="mt-6 text-lg text-gray-500">
+      You deserve the best memories ever ✨
+    </p>
+    <button onclick="showScreen(3)" class="mt-10 bg-pink-400 text-white px-8 py-4 rounded-full font-bold hover:bg-pink-500 transition">
+      Next →
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SCREEN 3 — Photo
+       (replace the src below with your image)
+  ════════════════════════════════════════ -->
+  <div id="screen3" class="hidden text-center fade">
+    <h1 class="text-5xl font-black text-pink-500 mb-10">
+      Main character energy 📸
+    </h1>
+    <div class="bg-pink-50 p-5 rounded-[30px] max-w-md mx-auto shadow-xl">
+      <!-- 👇 REPLACE THIS src WITH YOUR OWN IMAGE LINK -->
+      <img
+        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop"
+        class="rounded-3xl w-full h-80 object-cover"
+        alt="photo"
+      >
+    </div>
+    <button onclick="showScreen(4)" class="mt-10 bg-pink-400 text-white px-8 py-4 rounded-full font-bold hover:bg-pink-500 transition">
+      Next →
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SCREEN 4 — Gift picker
+  ════════════════════════════════════════ -->
+  <div id="screen4" class="hidden text-center fade">
+    <h1 class="text-5xl font-black text-pink-500">
+      Choose your surprise :) 🎁
+    </h1>
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+      <button onclick="gift('camera')" class="bg-pink-50 rounded-3xl p-8 shadow-lg text-5xl hover:scale-110 transition">📷</button>
+      <button onclick="gift('letter')"  class="bg-pink-50 rounded-3xl p-8 shadow-lg text-5xl hover:scale-110 transition">💌</button>
+      <button onclick="gift('star')"   class="bg-pink-50 rounded-3xl p-8 shadow-lg text-5xl hover:scale-110 transition">✨</button>
+    </div>
+    <div id="giftbox"></div>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+/* ── Typing animation ── */
+const message = "happy birthday to the prettiest soul ever 💝";
+const typed   = document.getElementById("typed");
+let i = 0;
+function type() {
+  if (i <= message.length) {
+    typed.innerHTML = message.slice(0, i) + "|";
+    i++;
+    setTimeout(type, 70);
+  }
+}
+type();
+
+/* ── FIX 1: randomise the correct heart ── */
+const TOTAL   = 9;
+const correct = Math.floor(Math.random() * TOTAL); // 0‒8, random every load
+const grid    = document.getElementById("heartGrid");
+const toast   = document.getElementById("toast");
+
+for (let k = 0; k < TOTAL; k++) {
+  const btn = document.createElement("button");
+  btn.className = "bg-pink-100 rounded-2xl p-5 hover:scale-110 transition text-3xl";
+  btn.textContent = "💖";
+
+  if (k === correct) {
+    btn.addEventListener("click", () => showScreen(2));
+  } else {
+    btn.addEventListener("click", () => {
+      btn.classList.add("shake");
+      btn.addEventListener("animationend", () => btn.classList.remove("shake"), { once: true });
+      toast.textContent = "Not this one… try again! 💔";
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 1800);
+    });
+  }
+  grid.appendChild(btn);
+}
+
+/* ── Show / hide screens ── */
+function showScreen(n) {
+  for (let s = 1; s <= 4; s++) {
+    document.getElementById("screen" + s).classList.add("hidden");
+  }
+  document.getElementById("screen" + n).classList.remove("hidden");
+}
+
+/* ── Gift messages ── */
+function gift(type) {
+  const box = document.getElementById("giftbox");
+  const msgs = {
+    camera: "Every memory with you becomes my favorite memory 💖",
+    letter: "Its been a good 4 years with you Mish, and I just cannot express with words on how grateful I am to have a friend like you. May allah bring you all the happiness and kindness that you deserve, and enjoy this day with all of your heart 🎂✨",
+    star:   "You are the real gift to me 🎁✨"
+  };
+  box.innerHTML = `<div class="mt-10 bg-pink-50 rounded-3xl p-8 shadow-xl text-gray-600 text-lg leading-relaxed fade">${msgs[type]}</div>`;
+}
+
+/* ── FIX 3: click-to-play music button ── */
+const audio    = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+let   playing  = false;
+
+musicBtn.addEventListener("click", () => {
+  if (playing) {
+    audio.pause();
+    musicBtn.textContent = "🎵";
+    musicBtn.classList.remove("playing");
+  } else {
+    audio.play().catch(() => {});
+    musicBtn.textContent = "🎶";
+    musicBtn.classList.add("playing");
+  }
+  playing = !playing;
+});
+</script>
+</body>
+</html>
